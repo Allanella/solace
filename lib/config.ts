@@ -10,39 +10,40 @@ export const CLINIC_CONFIG = {
   location: {
     city: 'Kampala',
     country: 'Uganda',
-    // TODO: Add exact address when available
-    address: '[Clinic address - Kampala, Uganda]',
-    // TODO: Add coordinates for Google Maps when available
+    address: 'Najera 11, opposite Najera 11 Central Market',
+    mapsLabel: 'Solace Dentalcare Clinic Najeera II',
+    mapsUrl: 'https://maps.app.goo.gl/9z73jZ2vMaXzM7Zd8',
     coordinates: {
       lat: 0.3476,
       lng: 32.5825,
     },
   },
   contact: {
-    // TODO: Add actual phone number
-    phone: '[Clinic phone number]',
-    // TODO: Add WhatsApp number - keep here for easy updates
-    whatsapp: '[WhatsApp number for inquiries]',
-    // TODO: Add actual email
-    email: '[clinic@solacedentalcare.ug]',
+    phone: '+256 763 496 878',
+    phoneSecondary: '+256 703 195 685',
+    officeLine: '+256 200 999 135',
+    whatsapp: '+256 703 195 685',
+    email: 'solacedentalcare2023@gmail.com',
+    emergency: null,
   },
   social: {
-    // TODO: Add actual social media links when available
     facebook: '',
     instagram: '',
+    tiktok: 'https://www.tiktok.com/@solacedentalcare',
     linkedin: '',
     twitter: '',
   },
   hours: {
-    weekday: {
+    mondayToSaturday: {
+      label: 'Monday – Saturday',
       open: '08:00 AM',
-      close: '05:00 PM',
+      close: '08:00 PM',
     },
-    saturday: {
+    sunday: {
+      label: 'Sunday',
       open: '09:00 AM',
       close: '02:00 PM',
     },
-    sunday: 'Closed',
   },
   // Site configuration
   siteUrl:
@@ -194,7 +195,6 @@ export const TEAM_MEMBERS = [
     role: 'Lead Dentist & Clinic Director',
     qualifications: '[BDS, Dental Specialization]',
     bio: '[Add professional biography when available]',
-    // TODO: Add actual photo path when available
     image: null,
   },
   {
