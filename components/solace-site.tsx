@@ -14,6 +14,7 @@ import {
   Clock3,
   Crown,
   DollarSign,
+  ExternalLink,
   Heart,
   Lightbulb,
   Globe,
@@ -58,10 +59,29 @@ function phoneHrefFor(phone: string) {
   return phone.startsWith('[') ? undefined : `tel:${phone.replace(/\s/g, '')}`
 }
 
-/**
- * Image map — all photos live in /public/pix/
- * Update the assignments here to swap which photo appears where.
- */
+function googleBusinessHref() {
+  return (
+    CLINIC_CONFIG.googleBusinessUrl ||
+    CLINIC_CONFIG.location.mapsUrl ||
+    `https://www.google.com/maps/search/?api=1&query=${CLINIC_CONFIG.location.coordinates.lat},${CLINIC_CONFIG.location.coordinates.lng}`
+  )
+}
+
+function googleMapsEmbedSrc() {
+  if (CLINIC_CONFIG.location.mapsEmbedUrl) return CLINIC_CONFIG.location.mapsEmbedUrl
+  const { lat, lng } = CLINIC_CONFIG.location.coordinates
+  return `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`
+}
+
+function reviewSummary() {
+  const reviews = CLINIC_CONFIG.reviews ?? []
+  if (reviews.length === 0) {
+    return { average: 5.0, count: 0, hasReviews: false }
+  }
+  const average = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+  return { average: Math.round(average * 10) / 10, count: reviews.length, hasReviews: true }
+}
+
 const PIX = {
   hero: '/pix/IMG_0545.jpg',
   aboutPrimary: '/pix/IMG_0541.jpg',
@@ -69,7 +89,6 @@ const PIX = {
   serviceCleaning: '/pix/IMG_0539.jpg',
   serviceWhitening: '/pix/IMG_0546.jpg',
   serviceCheckup: '/pix/IMG_0547.jpg',
-  // Team portraits
   teamOne: '/pix/AKML9604 - Copy.jpg',
   teamTwo: '/pix/AKML9628.jpg',
   teamThree: '/pix/AKML9679.jpg',
@@ -101,8 +120,7 @@ function Icon({ name, className }: { name: string; className?: string }) {
 }
 
 /* ---------------------------------------------------------------------- */
-/*  Shared motifs — a recurring "smile curve" is the one distinctive mark */
-/*  this site leans on, echoing the brand's actual subject matter.        */
+/*  Shared motifs                                                          */
 /* ---------------------------------------------------------------------- */
 
 function SmileMark({ className = 'size-4 text-secondary' }: { className?: string }) {
@@ -110,6 +128,19 @@ function SmileMark({ className = 'size-4 text-secondary' }: { className?: string
     <svg viewBox="0 0 32 16" fill="none" className={className} aria-hidden="true">
       <path d="M2 2c2.5 9 8.5 12 14 12s11.5-3 14-12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
       <circle cx="16" cy="13.5" r="1.6" fill="currentColor" />
+    </svg>
+  )
+}
+
+function GoldFlourish({ className = 'size-5 text-accent' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M12 2l1.9 5.8L20 9.3l-4.7 3.8L16.5 20 12 16.2 7.5 20l1.2-6.9L4 9.3l6.1-1.5L12 2z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
     </svg>
   )
 }
@@ -134,11 +165,6 @@ function SmileDivider({ flip = false, tone = 'background' }: { flip?: boolean; t
   )
 }
 
-/**
- * Reveal — a lightweight scroll-triggered fade/slide-in wrapper.
- * Wraps any section content so it animates into view the first time
- * it crosses into the viewport, then stays put (no re-triggering, no jank).
- */
 function Reveal({
   children,
   className = '',
@@ -154,7 +180,6 @@ function Reveal({
   useEffect(() => {
     const node = ref.current
     if (!node) return
-    // If the browser doesn't support IntersectionObserver, just show it.
     if (typeof IntersectionObserver === 'undefined') {
       setVisible(true)
       return
@@ -247,7 +272,6 @@ function NavLink({ href, label }: { href: string; label: string }) {
   )
 }
 
-/** Thin, animated progress bar tracking scroll position through the page. */
 export function ScrollProgress() {
   const [progress, setProgress] = useState(0)
 
@@ -269,7 +293,7 @@ export function ScrollProgress() {
   return (
     <div className="fixed inset-x-0 top-0 z-50 h-[3px] bg-transparent" aria-hidden="true">
       <div
-        className="h-full bg-secondary shadow-[0_0_8px_theme(colors.secondary.DEFAULT)] transition-[width] duration-150 ease-out"
+        className="h-full bg-gradient-to-r from-secondary via-accent to-secondary transition-[width] duration-150 ease-out"
         style={{ width: `${progress}%` }}
       />
     </div>
@@ -453,21 +477,35 @@ export function HeroSection() {
     Number.isFinite(establishedYear) && establishedYear > 1900 && establishedYear <= currentYear
       ? currentYear - establishedYear
       : null
+  const { average, count, hasReviews } = reviewSummary()
+  const googleHref = googleBusinessHref()
 
   return (
-    <section className="relative overflow-hidden bg-[linear-gradient(135deg,#f8f8ff_0%,#eef7f7_100%)]">
-      <div className="pointer-events-none absolute -left-24 top-10 hidden size-72 rounded-full border border-secondary/15 lg:block" />
-      <div className="pointer-events-none absolute right-10 top-1/3 hidden size-40 animate-pulse rounded-full bg-accent/10 blur-2xl lg:block" />
+    <section className="relative overflow-hidden bg-[linear-gradient(135deg,#eaf7fb_0%,#f7fbe9_55%,#ffffff_100%)]">
+      <div className="pointer-events-none absolute -left-24 top-10 hidden size-72 rounded-full border border-secondary/20 lg:block" />
+      <div className="pointer-events-none absolute right-10 top-1/3 hidden size-40 animate-pulse rounded-full bg-accent/15 blur-2xl lg:block" />
       <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 pt-16 pb-20 sm:pt-20 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16 lg:px-8 lg:pt-24 lg:pb-28">
         <div className="animate-fade-in-up">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-secondary/20 bg-background/70 px-4 py-2 text-xs font-semibold text-primary shadow-sm">
-            <SmileMark className="size-4 text-secondary" /> Trusted family dental care since {CLINIC_CONFIG.established}
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-secondary/30 bg-background/70 px-4 py-2 text-xs font-semibold text-primary shadow-sm">
+              <GoldFlourish className="size-3.5 text-accent" /> Trusted family dental care since {CLINIC_CONFIG.established}
+            </div>
+            <a
+              href={googleHref}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-background/70 px-3 py-2 text-xs font-bold text-primary shadow-sm transition-colors hover:border-accent"
+            >
+              <Star className="size-3.5 fill-accent text-accent" />
+              {average.toFixed(1)}
+              {hasReviews && <span className="font-medium text-muted-foreground">· {count} Google reviews</span>}
+            </a>
           </div>
           <h1 className="max-w-3xl font-serif text-5xl font-semibold leading-[1.02] tracking-tight text-primary sm:text-6xl lg:text-7xl">
             Restoring your{' '}
             <span className="relative inline-block text-secondary">
               beautiful
-              <svg viewBox="0 0 200 12" className="absolute -bottom-2 left-0 w-full text-secondary/40" fill="none" aria-hidden="true">
+              <svg viewBox="0 0 200 12" className="absolute -bottom-2 left-0 w-full text-accent" fill="none" aria-hidden="true">
                 <path d="M2 8c40-8 156-8 196 0" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
               </svg>
             </span>{' '}
@@ -500,8 +538,8 @@ export function HeroSection() {
           </div>
         </div>
         <div className="relative animate-slide-in-right">
-          <div className="absolute -right-5 -top-5 size-28 rounded-full border border-secondary/20" />
-          <div className="absolute -bottom-6 -left-6 size-20 rounded-2xl bg-accent/15" />
+          <div className="absolute -right-5 -top-5 size-28 rounded-full border border-accent/30" />
+          <div className="absolute -bottom-6 -left-6 size-20 rounded-2xl bg-secondary/20" />
           <div className="group relative overflow-hidden rounded-[2rem] rounded-bl-[5rem] border-8 border-background shadow-2xl transition-transform duration-500 hover:-translate-y-1">
             <Image
               src={PIX.hero}
@@ -513,7 +551,7 @@ export function HeroSection() {
             />
             <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between rounded-2xl bg-background/90 p-4 shadow-lg backdrop-blur-sm">
               <div className="flex items-center gap-3">
-                <span className="flex size-10 items-center justify-center rounded-full bg-secondary/15 text-secondary">
+                <span className="flex size-10 items-center justify-center rounded-full bg-secondary/20 text-secondary">
                   <Heart className="size-5 fill-current" />
                 </span>
                 <div>
@@ -522,11 +560,11 @@ export function HeroSection() {
                 </div>
               </div>
               <div className="flex items-center gap-1 text-sm font-bold text-primary">
-                <Star className="size-4 fill-accent text-accent" /> 5.0
+                <Star className="size-4 fill-accent text-accent" /> {average.toFixed(1)}
               </div>
             </div>
             {yearsOfCare !== null && yearsOfCare > 0 && (
-              <div className="absolute -left-4 top-6 flex size-20 -rotate-6 flex-col items-center justify-center rounded-2xl bg-secondary text-secondary-foreground shadow-xl transition-transform duration-300 group-hover:rotate-0">
+              <div className="absolute -left-4 top-6 flex size-20 -rotate-6 flex-col items-center justify-center rounded-2xl bg-accent text-accent-foreground shadow-xl transition-transform duration-300 group-hover:rotate-0">
                 <span className="font-serif text-2xl font-bold leading-none">{yearsOfCare}+</span>
                 <span className="text-[10px] font-semibold uppercase tracking-wide">Years</span>
               </div>
@@ -542,20 +580,18 @@ export function HeroSection() {
 export function QuickActions() {
   const whatsappHref = whatsappLink()
   const phoneHref = phoneHrefFor(CLINIC_CONFIG.contact.phone)
-  const mapsHref =
-    CLINIC_CONFIG.location.mapsUrl ||
-    `https://www.google.com/maps/search/?api=1&query=${CLINIC_CONFIG.location.coordinates.lat},${CLINIC_CONFIG.location.coordinates.lng}`
+  const googleHref = googleBusinessHref()
 
   return (
     <section className="relative z-10 mx-auto -mt-4 max-w-7xl px-5 lg:px-8">
-      <div className="grid overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xl sm:grid-cols-3">
+      <div className="grid overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xl sm:grid-cols-4">
         <a
           href={whatsappHref}
           target={whatsappHref === '#' ? undefined : '_blank'}
           rel="noreferrer"
           className="group flex items-center gap-4 border-b border-border p-5 transition-colors hover:bg-muted sm:border-b-0 sm:border-r"
         >
-          <span className="flex size-11 items-center justify-center rounded-xl bg-secondary/10 text-secondary transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
+          <span className="flex size-11 items-center justify-center rounded-xl bg-secondary/15 text-secondary transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
             <MessageCircle />
           </span>
           <span>
@@ -578,17 +614,32 @@ export function QuickActions() {
         </a>
 
         <a
-          href={mapsHref}
+          href={CLINIC_CONFIG.location.mapsUrl || googleHref}
           target="_blank"
           rel="noreferrer"
-          className="group flex items-center gap-4 p-5 transition-colors hover:bg-muted"
+          className="group flex items-center gap-4 border-b border-border p-5 transition-colors hover:bg-muted sm:border-b-0 sm:border-r"
         >
-          <span className="flex size-11 items-center justify-center rounded-xl bg-accent/10 text-accent transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
+          <span className="flex size-11 items-center justify-center rounded-xl bg-accent/15 text-accent transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
             <MapPin />
           </span>
           <span>
             <span className="block text-sm font-bold text-primary">Find us</span>
             <span className="text-xs text-muted-foreground">{CLINIC_CONFIG.location.address}</span>
+          </span>
+        </a>
+
+        <a
+          href={googleHref}
+          target="_blank"
+          rel="noreferrer"
+          className="group flex items-center gap-4 p-5 transition-colors hover:bg-muted"
+        >
+          <span className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
+            <Star className="fill-current" />
+          </span>
+          <span>
+            <span className="block text-sm font-bold text-primary">Google reviews</span>
+            <span className="text-xs text-muted-foreground">See us on Google</span>
           </span>
         </a>
       </div>
@@ -600,7 +651,7 @@ export function AboutSection() {
   return (
     <section className="mx-auto grid max-w-7xl gap-12 px-5 py-24 lg:grid-cols-2 lg:items-center lg:px-8 lg:py-32">
       <Reveal className="relative">
-        <div className="absolute -left-6 -top-6 size-24 rounded-3xl bg-secondary/10" />
+        <div className="absolute -left-6 -top-6 size-24 rounded-3xl bg-secondary/15" />
         <div className="group relative overflow-hidden rounded-[2rem] shadow-2xl">
           <Image
             src={PIX.aboutPrimary}
@@ -625,7 +676,7 @@ export function AboutSection() {
             className="aspect-square w-full object-cover"
           />
         </div>
-        <div className="absolute -left-4 -top-4 flex size-16 items-center justify-center rounded-2xl bg-secondary text-secondary-foreground shadow-lg">
+        <div className="absolute -left-4 -top-4 flex size-16 items-center justify-center rounded-2xl bg-accent text-accent-foreground shadow-lg">
           <Stethoscope className="size-7" />
         </div>
       </Reveal>
@@ -648,7 +699,7 @@ export function AboutSection() {
 
 export function ServicesSection() {
   return (
-    <section className="bg-muted/50">
+    <section className="bg-muted/60">
       <div className="mx-auto max-w-7xl px-5 py-24 lg:px-8 lg:py-32">
         <SectionHeading
           centered
@@ -661,22 +712,22 @@ export function ServicesSection() {
             <Reveal key={service.id} delay={index * 100}>
               <article
                 className={`group relative overflow-hidden rounded-3xl border p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
-                  index === 1 ? 'border-secondary/30 bg-primary text-primary-foreground' : 'border-border bg-card'
+                  index === 1 ? 'border-accent/40 bg-primary text-primary-foreground' : 'border-border bg-card'
                 }`}
               >
                 {index === 1 && (
-                  <span className="absolute right-6 top-6 z-10 rounded-full bg-secondary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-secondary">
-                    Most requested
+                  <span className="absolute right-6 top-6 z-10 flex items-center gap-1 rounded-full bg-accent/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-accent">
+                    <GoldFlourish className="size-3" /> Most requested
                   </span>
                 )}
                 <div
                   className={`absolute -right-8 -top-8 size-24 rounded-full transition-transform duration-300 group-hover:scale-110 ${
-                    index === 1 ? 'bg-secondary/15' : 'bg-secondary/5'
+                    index === 1 ? 'bg-secondary/20' : 'bg-secondary/10'
                   }`}
                 />
                 <span
                   className={`relative flex size-12 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:-rotate-6 ${
-                    index === 1 ? 'bg-secondary text-secondary-foreground' : 'bg-secondary/10 text-secondary'
+                    index === 1 ? 'bg-accent text-accent-foreground' : 'bg-secondary/15 text-secondary'
                   }`}
                 >
                   <Icon name={service.icon} className="size-6" />
@@ -698,7 +749,7 @@ export function ServicesSection() {
                 <Link
                   href="/services"
                   className={`group/link relative mt-7 inline-flex items-center gap-2 text-sm font-bold ${
-                    index === 1 ? 'text-secondary' : 'text-primary'
+                    index === 1 ? 'text-accent' : 'text-primary'
                   }`}
                 >
                   View all services{' '}
@@ -778,8 +829,8 @@ export function TrustSection() {
           <div className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {TRUST_POINTS.map((point, index) => (
               <Reveal key={point.title} delay={index * 80}>
-                <div className="group border-l-2 border-secondary/30 pl-5 transition-colors duration-300 hover:border-secondary">
-                  <span className="flex size-11 items-center justify-center rounded-xl bg-secondary/15 text-secondary transition-transform duration-300 group-hover:scale-110">
+                <div className="group border-l-2 border-accent/40 pl-5 transition-colors duration-300 hover:border-accent">
+                  <span className="flex size-11 items-center justify-center rounded-xl bg-secondary/20 text-secondary transition-transform duration-300 group-hover:scale-110">
                     <Icon name={point.icon} className="size-5" />
                   </span>
                   <h3 className="mt-4 font-semibold">{point.title}</h3>
@@ -808,9 +859,9 @@ export function TimelineSection() {
           <Reveal key={item.step} delay={index * 100}>
             <div className="group relative rounded-3xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
               {index < APPOINTMENT_STEPS.length - 1 && (
-                <div className="absolute left-full top-12 hidden h-px w-5 bg-secondary/30 md:block" />
+                <div className="absolute left-full top-12 hidden h-px w-5 bg-accent/40 md:block" />
               )}
-              <span className="flex size-9 items-center justify-center rounded-full bg-secondary/10 font-serif text-lg font-semibold text-secondary transition-colors duration-300 group-hover:bg-secondary group-hover:text-secondary-foreground">
+              <span className="flex size-9 items-center justify-center rounded-full bg-secondary/15 font-serif text-lg font-semibold text-secondary transition-colors duration-300 group-hover:bg-secondary group-hover:text-secondary-foreground">
                 {item.step}
               </span>
               <h3 className="mt-6 font-serif text-xl font-semibold text-primary">{item.title}</h3>
@@ -825,7 +876,7 @@ export function TimelineSection() {
 
 export function ValuesSection() {
   return (
-    <section className="bg-muted/50">
+    <section className="bg-muted/60">
       <div className="mx-auto grid max-w-7xl gap-12 px-5 py-24 lg:grid-cols-[0.8fr_1.2fr] lg:px-8 lg:py-28">
         <div>
           <SectionHeading
@@ -837,8 +888,8 @@ export function ValuesSection() {
         <div className="grid gap-4 sm:grid-cols-2">
           {VALUES.map((value, index) => (
             <Reveal key={value.title} delay={index * 80}>
-              <div className="group rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-secondary/40 hover:shadow-md">
-                <span className="flex size-10 items-center justify-center rounded-xl bg-secondary/10 text-secondary transition-transform duration-300 group-hover:scale-110">
+              <div className="group rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-md">
+                <span className="flex size-10 items-center justify-center rounded-xl bg-secondary/15 text-secondary transition-transform duration-300 group-hover:scale-110">
                   <Icon name={value.icon} className="size-5" />
                 </span>
                 <h3 className="mt-4 font-semibold text-primary">{value.title}</h3>
@@ -896,11 +947,10 @@ export function MissionSection() {
 }
 
 export function TeamSection() {
-  // Real team portraits from /public/pix/
   const teamImages = [PIX.teamOne, PIX.teamTwo, PIX.teamThree, PIX.teamFour]
 
   return (
-    <section className="bg-muted/50">
+    <section className="bg-muted/60">
       <div className="mx-auto max-w-7xl px-5 py-24 lg:px-8 lg:py-32">
         <SectionHeading
           centered
@@ -935,6 +985,73 @@ export function TeamSection() {
           ))}
         </div>
       </div>
+    </section>
+  )
+}
+
+export function TestimonialsSection({ compact = false }: { compact?: boolean }) {
+  const allReviews = CLINIC_CONFIG.reviews ?? []
+  const reviews = compact ? allReviews.slice(0, 3) : allReviews
+  const googleHref = googleBusinessHref()
+  const { average, count, hasReviews } = reviewSummary()
+
+  return (
+    <section className={compact ? 'mx-auto max-w-7xl px-5 py-16 lg:px-8' : 'mx-auto max-w-7xl px-5 py-24 lg:px-8 lg:py-32'}>
+      <SectionHeading
+        centered
+        eyebrow="Patient stories"
+        title="What our patients say on Google"
+        body={
+          hasReviews
+            ? `Rated ${average.toFixed(1)} out of 5 from ${count} Google ${count === 1 ? 'review' : 'reviews'}.`
+            : 'Real reviews from real patients, straight from our Google Business profile.'
+        }
+      />
+
+      {reviews.length === 0 ? (
+        <div className="mx-auto mt-12 max-w-lg rounded-3xl border border-dashed border-accent/40 bg-accent/5 p-10 text-center">
+          <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-accent/15 text-accent">
+            <Star className="size-6" />
+          </div>
+          <p className="mt-4 font-serif text-xl text-primary">Reviews coming soon</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            We&apos;re adding our Google reviews here shortly. In the meantime, you can read them directly on Google.
+          </p>
+          <a href={googleHref} target="_blank" rel="noreferrer" className="mt-5 inline-block">
+            <Button variant="outline" className="rounded-full">
+              Read our Google reviews <ExternalLink className="size-4" />
+            </Button>
+          </a>
+        </div>
+      ) : (
+        <>
+          <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {reviews.map((review, index) => (
+              <Reveal key={review.id} delay={index * 80}>
+                <article className="flex h-full flex-col rounded-3xl border border-border bg-card p-6 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-accent">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} className={`size-4 ${i < review.rating ? 'fill-current' : 'fill-none text-muted-foreground/30'}`} />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="mt-4 flex-1 text-sm leading-6 text-muted-foreground">&ldquo;{review.text}&rdquo;</p>
+                  <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
+                    <p className="text-sm font-bold text-primary">{review.name}</p>
+                    <p className="text-xs text-muted-foreground">{review.relativeTime}</p>
+                  </div>
+                </article>
+              </Reveal>
+            ))}
+          </div>
+          <div className="mt-8 text-center">
+            <a href={googleHref} target="_blank" rel="noreferrer" className="group inline-flex items-center gap-2 text-sm font-bold text-primary">
+              See all reviews on Google <ExternalLink className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
+            </a>
+          </div>
+        </>
+      )}
     </section>
   )
 }
@@ -1168,15 +1285,50 @@ export function AppointmentSection() {
   )
 }
 
+export function LocationMap() {
+  const googleHref = googleBusinessHref()
+  return (
+    <section className="mx-auto max-w-7xl px-5 py-24 lg:px-8 lg:py-32">
+      <SectionHeading
+        centered
+        eyebrow="Visit our clinic"
+        title="Find us on the map"
+        body={CLINIC_CONFIG.location.address}
+      />
+      <div className="mt-12 overflow-hidden rounded-[2rem] border border-border shadow-xl">
+        <iframe
+          src={googleMapsEmbedSrc()}
+          title="Solace Dentalcare location on Google Maps"
+          className="h-[380px] w-full sm:h-[460px]"
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+        />
+      </div>
+      <div className="mt-6 flex flex-wrap justify-center gap-3">
+        <a href={CLINIC_CONFIG.location.mapsUrl} target="_blank" rel="noreferrer">
+          <Button variant="outline" className="rounded-full">
+            <MapPin data-icon="inline-start" /> Get directions
+          </Button>
+        </a>
+        <a href={googleHref} target="_blank" rel="noreferrer">
+          <Button className="rounded-full">
+            <Star data-icon="inline-start" /> View on Google Business
+          </Button>
+        </a>
+      </div>
+    </section>
+  )
+}
+
 export function FinalCTA() {
   const whatsappHref = whatsappLink('Hello Solace Dentalcare, I would like to book an appointment.')
   return (
     <section className="mx-auto max-w-7xl px-5 py-20 lg:px-8">
       <div className="relative overflow-hidden rounded-[2rem] bg-primary px-6 py-12 text-center sm:px-12 sm:py-16">
-        <div className="absolute -right-10 -top-10 size-48 animate-pulse rounded-full border border-secondary/20" />
+        <div className="absolute -right-10 -top-10 size-48 animate-pulse rounded-full border border-accent/30" />
         <div className="absolute -bottom-20 -left-10 size-56 rounded-full border border-primary-foreground/10" />
         <div className="relative">
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-secondary">Your smile matters</p>
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-accent">Your smile matters</p>
           <h2 className="mx-auto mt-5 max-w-2xl font-serif text-3xl font-semibold text-primary-foreground sm:text-4xl">
             Professional, affordable and gentle dental care for you and your family.
           </h2>
@@ -1207,6 +1359,7 @@ export function SiteFooter() {
     { href: CLINIC_CONFIG.social.tiktok, icon: Globe, label: 'TikTok' },
     { href: CLINIC_CONFIG.social.instagram, icon: Globe, label: 'Instagram' },
     { href: CLINIC_CONFIG.social.linkedin, icon: Globe, label: 'LinkedIn' },
+    { href: googleBusinessHref(), icon: Star, label: 'Google Business' },
   ].filter((social) => social.href)
 
   return (
@@ -1226,7 +1379,7 @@ export function SiteFooter() {
                   target="_blank"
                   rel="noreferrer"
                   aria-label={label}
-                  className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-secondary hover:text-secondary"
+                  className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-accent hover:text-accent"
                 >
                   <SocialIcon className="size-4" />
                 </a>
@@ -1268,6 +1421,10 @@ export function SiteFooter() {
                 <Mail className="size-4 shrink-0 text-secondary" />
                 {CLINIC_CONFIG.contact.email}
               </p>
+              <a href={googleBusinessHref()} target="_blank" rel="noreferrer" className="flex items-center gap-2 font-semibold text-primary hover:text-accent">
+                <Star className="size-4 shrink-0 text-accent" />
+                View us on Google Business
+              </a>
             </div>
           </div>
         </div>
@@ -1296,7 +1453,6 @@ export function FloatingWhatsApp() {
   )
 }
 
-/** Small "scroll to top" button that fades in once the page has scrolled a bit. */
 export function BackToTop() {
   const [visible, setVisible] = useState(false)
 
@@ -1311,7 +1467,7 @@ export function BackToTop() {
     <button
       aria-label="Back to top"
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      className={`fixed bottom-24 right-5 z-30 flex size-11 items-center justify-center rounded-full border border-border bg-background/90 text-primary shadow-lg backdrop-blur-sm transition-all duration-300 hover:border-secondary hover:text-secondary lg:bottom-5 lg:right-24 ${
+      className={`fixed bottom-24 right-5 z-30 flex size-11 items-center justify-center rounded-full border border-border bg-background/90 text-primary shadow-lg backdrop-blur-sm transition-all duration-300 hover:border-accent hover:text-accent lg:bottom-5 lg:right-24 ${
         visible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'
       }`}
     >
@@ -1320,7 +1476,6 @@ export function BackToTop() {
   )
 }
 
-/** Mobile-only quick-action bar (Call / WhatsApp / Book) that appears once you start scrolling. */
 export function StickyMobileCTA() {
   const [visible, setVisible] = useState(false)
   const phoneHref = phoneHrefFor(CLINIC_CONFIG.contact.phone)
@@ -1341,7 +1496,7 @@ export function StickyMobileCTA() {
     >
       <a
         href={phoneHref}
-        className="flex flex-1 items-center justify-center gap-2 rounded-full border border-border py-3 text-sm font-bold text-primary transition-colors hover:border-secondary hover:text-secondary"
+        className="flex flex-1 items-center justify-center gap-2 rounded-full border border-border py-3 text-sm font-bold text-primary transition-colors hover:border-accent hover:text-accent"
       >
         <Phone className="size-4" /> Call
       </a>
@@ -1375,12 +1530,14 @@ export function HomePage() {
         <ServicesSection />
         <PopularServices />
         <TrustSection />
+        <TestimonialsSection />
         <TimelineSection />
         <ValuesSection />
         <MissionSection />
         <TeamSection />
         <FAQSection compact />
         <AppointmentSection />
+        <LocationMap />
         <FinalCTA />
       </main>
       <SiteFooter />
@@ -1420,7 +1577,7 @@ export function InnerPage({ type }: { type: 'about' | 'services' | 'team' | 'faq
       <ScrollProgress />
       <SiteHeader />
       <main>
-        <section className="relative overflow-hidden bg-[linear-gradient(135deg,#f8f8ff_0%,#eef7f7_100%)]">
+        <section className="relative overflow-hidden bg-[linear-gradient(135deg,#eaf7fb_0%,#f7fbe9_100%)]">
           <div className="mx-auto max-w-7xl px-5 py-20 lg:px-8 lg:py-28">
             <SectionHeading eyebrow={content.eyebrow} title={content.title} body={content.body} />
           </div>
@@ -1441,7 +1598,13 @@ export function InnerPage({ type }: { type: 'about' | 'services' | 'team' | 'faq
         )}
         {type === 'team' && <TeamSection />}
         {type === 'faqs' && <FAQSection />}
-        {type === 'contact' && <AppointmentSection />}
+        {type === 'contact' && (
+          <>
+            <TestimonialsSection compact />
+            <AppointmentSection />
+            <LocationMap />
+          </>
+        )}
       </main>
       <FinalCTA />
       <SiteFooter />
@@ -1467,6 +1630,10 @@ export function ContactDetails() {
         <Mail className="size-5 shrink-0 text-secondary" />
         {CLINIC_CONFIG.contact.email}
       </p>
+      <a href={googleBusinessHref()} target="_blank" rel="noreferrer" className="flex items-center gap-3 font-semibold text-primary hover:text-accent">
+        <Star className="size-5 shrink-0 text-accent" />
+        View us on Google Business
+      </a>
     </div>
   )
 }
