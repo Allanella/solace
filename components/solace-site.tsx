@@ -89,10 +89,11 @@ const PIX = {
   serviceCleaning: '/pix/IMG_0539.jpg',
   serviceWhitening: '/pix/IMG_0546.jpg',
   serviceCheckup: '/pix/IMG_0547.jpg',
+  // Mapped to: Kafeero Peter, Kayanja David, Nakayima Caroline
   teamOne: '/pix/AKML9604 - Copy.jpg',
   teamTwo: '/pix/AKML9628.jpg',
   teamThree: '/pix/AKML9679.jpg',
-  teamFour: '/pix/AKML9686.jpg',
+  teamFour: '/pix/AKML9686.jpg', // Reserved for Sophie (currently unused in UI)
   missionBg: '/pix/IMG_0550.jpg',
   visionBg: '/pix/IMG_0553.jpg',
 }
@@ -947,7 +948,7 @@ export function MissionSection() {
 }
 
 export function TeamSection() {
-  const teamImages = [PIX.teamOne, PIX.teamTwo, PIX.teamThree, PIX.teamFour]
+  const teamImages = [PIX.teamOne, PIX.teamTwo, PIX.teamThree]
 
   return (
     <section className="bg-muted/60">
@@ -956,33 +957,45 @@ export function TeamSection() {
           centered
           eyebrow="Our dental team"
           title="People who care about your smile"
-          body="Meet the team behind Solace Dentalcare. Staff profiles and photographs will be added as information becomes available."
+          body="Meet the team behind Solace Dentalcare."
         />
-        <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {TEAM_MEMBERS.map((member, index) => (
-            <Reveal key={member.id} delay={index * 90}>
-              <article className="group overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                <div className="relative aspect-[4/5] overflow-hidden bg-primary/5">
-                  <Image
-                    src={teamImages[index] ?? PIX.teamOne}
-                    alt={member.name}
-                    width={600}
-                    height={750}
-                    className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-primary/0 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-5">
-                    <h3 className="font-serif text-xl font-semibold text-primary-foreground">{member.name}</h3>
-                    <p className="mt-1 text-sm font-semibold text-secondary">{member.role}</p>
+        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {TEAM_MEMBERS.map((member, index) => {
+            // If it's the placeholder member (index 3), use a standard placeholder icon instead of an image
+            const isPlaceholder = index === 3 || member.name.startsWith('[')
+            const imgSrc = !isPlaceholder ? teamImages[index] : null
+
+            return (
+              <Reveal key={member.id} delay={index * 90}>
+                <article className="group overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                  <div className="relative aspect-[4/5] overflow-hidden bg-primary/5">
+                    {imgSrc ? (
+                      <Image
+                        src={imgSrc}
+                        alt={member.name}
+                        width={600}
+                        height={750}
+                        className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex size-full items-center justify-center bg-muted/30">
+                        <Users className="size-16 text-primary/20" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-primary/0 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <h3 className="font-serif text-xl font-semibold text-primary-foreground">{member.name}</h3>
+                      <p className="mt-1 text-sm font-semibold text-secondary">{member.role}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="p-6">
-                  <p className="text-xs font-medium tracking-wide text-muted-foreground">{member.qualifications}</p>
-                  <p className="mt-3 text-sm leading-6 text-muted-foreground">{member.bio}</p>
-                </div>
-              </article>
-            </Reveal>
-          ))}
+                  <div className="p-6">
+                    <p className="text-xs font-medium tracking-wide text-muted-foreground">{member.qualifications}</p>
+                    <p className="mt-3 text-sm leading-6 text-muted-foreground">{member.bio}</p>
+                  </div>
+                </article>
+              </Reveal>
+            )
+          })}
         </div>
       </div>
     </section>
