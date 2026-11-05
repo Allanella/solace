@@ -89,13 +89,19 @@ const PIX = {
   serviceCleaning: '/pix/IMG_0539.jpg',
   serviceWhitening: '/pix/IMG_0546.jpg',
   serviceCheckup: '/pix/IMG_0547.jpg',
-  // Mapped to: Kafeero Peter, Kayanja David, Nakayima Caroline
-  teamOne: '/pix/AKML9604 - Copy.jpg',
-  teamTwo: '/pix/AKML9628.jpg',
-  teamThree: '/pix/AKML9679.jpg',
-  teamFour: '/pix/AKML9686.jpg', // Reserved for Sophie (currently unused in UI)
   missionBg: '/pix/IMG_0550.jpg',
   visionBg: '/pix/IMG_0553.jpg',
+}
+
+/** Team photos, keyed by each person's `id` in TEAM_MEMBERS (lib/config.ts).
+ *  Keying by id (not list position) means a photo always stays with the
+ *  right person, even if the order of the team list changes.
+ *  All files live in /public/pix/. */
+const TEAM_PHOTOS: Record<string, string> = {
+  'kafeero-peter': '/pix/AKML9604 - Copy.jpg',
+  'kayanja-david': '/pix/AKML9628.jpg',
+  'nakayima-caroline': '/pix/AKML9679.jpg',
+  'nansukusa-sophie': '/pix/AKML9657.jpg',
 }
 
 const iconMap = {
@@ -947,9 +953,10 @@ export function MissionSection() {
   )
 }
 
+/** Team section — stateless, so server and client always render identical HTML.
+ *  Each photo is looked up by the person's `id` in TEAM_PHOTOS (see top of file).
+ *  The Users-icon placeholder only appears if someone has no photo listed. */
 export function TeamSection() {
-  const teamImages = [PIX.teamOne, PIX.teamTwo, PIX.teamThree]
-
   return (
     <section className="bg-muted/60">
       <div className="mx-auto max-w-7xl px-5 py-24 lg:px-8 lg:py-32">
@@ -959,15 +966,13 @@ export function TeamSection() {
           title="People who care about your smile"
           body="Meet the team behind Solace Dentalcare."
         />
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {TEAM_MEMBERS.map((member, index) => {
-            // If it's the placeholder member (index 3), use a standard placeholder icon instead of an image
-            const isPlaceholder = index === 3 || member.name.startsWith('[')
-            const imgSrc = !isPlaceholder ? teamImages[index] : null
+            const imgSrc = TEAM_PHOTOS[member.id] ?? null
 
             return (
               <Reveal key={member.id} delay={index * 90}>
-                <article className="group overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                <article className="group h-full overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                   <div className="relative aspect-[4/5] overflow-hidden bg-primary/5">
                     {imgSrc ? (
                       <Image
@@ -975,6 +980,7 @@ export function TeamSection() {
                         alt={member.name}
                         width={600}
                         height={750}
+                        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
                         className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     ) : (
@@ -1003,8 +1009,14 @@ export function TeamSection() {
 }
 
 export function TestimonialsSection({ compact = false }: { compact?: boolean }) {
+  const [showAll, setShowAll] = useState(false)
   const allReviews = CLINIC_CONFIG.reviews ?? []
-  const reviews = compact ? allReviews.slice(0, 3) : allReviews
+
+  const visibleReviews = showAll || compact
+    ? allReviews
+    : allReviews.slice(0, 2)
+
+  const hasMore = allReviews.length > visibleReviews.length
   const googleHref = googleBusinessHref()
   const { average, count, hasReviews } = reviewSummary()
 
@@ -1021,7 +1033,7 @@ export function TestimonialsSection({ compact = false }: { compact?: boolean }) 
         }
       />
 
-      {reviews.length === 0 ? (
+      {allReviews.length === 0 ? (
         <div className="mx-auto mt-12 max-w-lg rounded-3xl border border-dashed border-accent/40 bg-accent/5 p-10 text-center">
           <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-accent/15 text-accent">
             <Star className="size-6" />
@@ -1039,7 +1051,7 @@ export function TestimonialsSection({ compact = false }: { compact?: boolean }) 
       ) : (
         <>
           <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {reviews.map((review, index) => (
+            {visibleReviews.map((review, index) => (
               <Reveal key={review.id} delay={index * 80}>
                 <article className="flex h-full flex-col rounded-3xl border border-border bg-card p-6 shadow-sm">
                   <div className="flex items-center justify-between">
@@ -1058,7 +1070,17 @@ export function TestimonialsSection({ compact = false }: { compact?: boolean }) 
               </Reveal>
             ))}
           </div>
-          <div className="mt-8 text-center">
+
+          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            {hasMore && !compact && (
+              <Button
+                variant="outline"
+                className="rounded-full"
+                onClick={() => setShowAll(true)}
+              >
+                Read more reviews <ChevronDown className="ml-2 size-4" />
+              </Button>
+            )}
             <a href={googleHref} target="_blank" rel="noreferrer" className="group inline-flex items-center gap-2 text-sm font-bold text-primary">
               See all reviews on Google <ExternalLink className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
             </a>

@@ -17,7 +17,6 @@ export const CLINIC_CONFIG = {
       lat: 0.389641763911584,
       lng: 32.623060574037545,
     },
-    // Real "Embed a map" src, extracted from Google Maps share dialog.
     mapsEmbedUrl:
       'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.7260616735975!2d32.623060574037545!3d0.389641763911584!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x177db1c069a097a9%3A0xf407071d6323742b!2sSolace%20dentalcare%20clinic%20Najeera%20II!5e0!3m2!1sen!2sug!4v1789641641028!5m2!1sen!2sug',
   },
@@ -36,8 +35,6 @@ export const CLINIC_CONFIG = {
     linkedin: '',
     twitter: '',
   },
-  // Google Business / Maps share link — used for "View on Google" and
-  // "Google reviews" links across the site.
   googleBusinessUrl: 'https://maps.app.goo.gl/mh9GayDXqkjTdizS7',
   hours: {
     mondayToSaturday: {
@@ -51,12 +48,17 @@ export const CLINIC_CONFIG = {
       close: '02:00 PM',
     },
   },
-  // Site configuration
   siteUrl:
     process.env.NEXT_PUBLIC_SITE_URL ||
     'https://solacedentalcare.vercel.app',
-  // Real reviews copied from the Solace Dentalcare Google Business profile.
   reviews: [
+    {
+      id: 'namanda-juliet',
+      name: 'Namanda Juliet',
+      rating: 5,
+      text: 'They offer perfect service forever, you should visit them one day.',
+      relativeTime: '6 days ago',
+    },
     {
       id: 'daniel-omara',
       name: 'Daniel Omara',
@@ -71,13 +73,6 @@ export const CLINIC_CONFIG = {
       rating: 5,
       text: 'Best dental services, best patient care and amazing dentists. Thank you Dr. Peter and team.',
       relativeTime: '2 years ago',
-    },
-    {
-      id: 'namanda-juliet',
-      name: 'Namanda Juliet',
-      rating: 5,
-      text: 'They offer perfect service forever, you should visit them one day.',
-      relativeTime: '6 days ago',
     },
   ] as {
     id: string
@@ -252,10 +247,10 @@ export const TEAM_MEMBERS = [
   },
   {
     id: 'nansukusa-sophie',
-    name: '[Staff Name]',
+    name: 'Nansukusa Sophie',
     role: 'Dental Assistant | Dental Nurse',
-    qualifications: '[Qualifications]',
-    bio: '[Add professional biography when available]',
+    qualifications: 'Dental Nursing',
+    bio: 'Passionate about patient care and making every visit to Solace Dentalcare a welcoming and positive experience.',
     image: null,
   },
 ]
