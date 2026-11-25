@@ -143,6 +143,12 @@ export const POPULAR_SERVICES = [
     description: 'Remove plaque and tartar buildup for a fresh, clean mouth.',
     icon: 'Sparkles',
     benefits: ['Prevents cavities', 'Fresh breath', 'Healthy gums'],
+    featured: true,
+    image: '/pix/cleaning-after.webp',
+    beforeAfter: {
+      before: '/pix/cleaning-before.webp',
+      after: '/pix/cleaning-after.webp',
+    },
   },
   {
     id: 'whitening',
@@ -150,6 +156,12 @@ export const POPULAR_SERVICES = [
     description: 'Brighten your smile with professional whitening treatments.',
     icon: 'Lightbulb',
     benefits: ['Instant results', 'Safe and effective', 'Long-lasting'],
+    featured: true,
+    image: '/pix/whitening-after.webp',
+    beforeAfter: {
+      before: '/pix/whitening-before.webp',
+      after: '/pix/whitening-after.webp',
+    },
   },
   {
     id: 'checkup',
@@ -158,6 +170,9 @@ export const POPULAR_SERVICES = [
       'Comprehensive oral health examination to detect issues early.',
     icon: 'Search',
     benefits: ['Early detection', 'Prevention', 'Peace of mind'],
+    featured: false,
+    image: '/pix/checkup.webp',
+    beforeAfter: null,
   },
 ]
 

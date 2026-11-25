@@ -83,14 +83,11 @@ function reviewSummary() {
 }
 
 const PIX = {
-  hero: '/pix/IMG_0545.jpg',
-  aboutPrimary: '/pix/IMG_0541.jpg',
-  aboutSecondary: '/pix/IMG_0544.jpg',
-  serviceCleaning: '/pix/IMG_0539.jpg',
-  serviceWhitening: '/pix/IMG_0546.jpg',
-  serviceCheckup: '/pix/IMG_0547.jpg',
-  missionBg: '/pix/IMG_0550.jpg',
-  visionBg: '/pix/IMG_0553.jpg',
+  hero: '/pix/hero.webp',
+  aboutPrimary: '/pix/about-primary.webp',
+  aboutSecondary: '/pix/about-secondary.webp',
+  missionBg: '/pix/mission-bg.webp',
+  visionBg: '/pix/vision-bg.webp',
 }
 
 /** Team photos, keyed by each person's `id` in TEAM_MEMBERS (lib/config.ts).
@@ -98,10 +95,10 @@ const PIX = {
  *  right person, even if the order of the team list changes.
  *  All files live in /public/pix/. */
 const TEAM_PHOTOS: Record<string, string> = {
-  'kafeero-peter': '/pix/AKML9604 - Copy.jpg',
-  'kayanja-david': '/pix/AKML9628.jpg',
-  'nakayima-caroline': '/pix/AKML9679.jpg',
-  'nansukusa-sophie': '/pix/AKML9657.jpg',
+  'kafeero-peter': '/pix/team-kafeero-peter.webp',
+  'kayanja-david': '/pix/team-kayanja-david.webp',
+  'nakayima-caroline': '/pix/team-nakayima-caroline.webp',
+  'nansukusa-sophie': '/pix/team-nansukusa-sophie.webp',
 }
 
 const iconMap = {
@@ -554,6 +551,7 @@ export function HeroSection() {
               width={900}
               height={620}
               priority
+              sizes="(min-width: 1024px) 50vw, 100vw"
               className="aspect-[1.25] object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between rounded-2xl bg-background/90 p-4 shadow-lg backdrop-blur-sm">
@@ -704,7 +702,55 @@ export function AboutSection() {
   )
 }
 
+function BeforeAfter({
+  before,
+  after,
+  label,
+  priority = false,
+}: {
+  before: string
+  after: string
+  label: string
+  priority?: boolean
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-1 overflow-hidden rounded-2xl bg-border/60 sm:gap-2">
+      <div className="relative aspect-[4/3] overflow-hidden">
+        <Image
+          src={before}
+          alt={`${label} before treatment`}
+          fill
+          sizes="(min-width: 768px) 25vw, 45vw"
+          priority={priority}
+          className="object-cover"
+        />
+        <span className="absolute left-2 top-2 rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-primary shadow-sm backdrop-blur-sm sm:left-3 sm:top-3 sm:px-3">
+          Before
+        </span>
+      </div>
+      <div className="relative aspect-[4/3] overflow-hidden">
+        <Image
+          src={after}
+          alt={`${label} after treatment`}
+          fill
+          sizes="(min-width: 768px) 25vw, 45vw"
+          priority={priority}
+          className="object-cover"
+        />
+        <span className="absolute left-2 top-2 rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-secondary-foreground shadow-sm sm:left-3 sm:top-3 sm:px-3">
+          After
+        </span>
+      </div>
+    </div>
+  )
+}
+
 export function ServicesSection() {
+  const featured = SERVICES[1] ?? SERVICES[0]
+  const tabServices = SERVICES.filter((service) => service.id !== featured.id)
+  const [activeTab, setActiveTab] = useState(tabServices[0]?.id ?? SERVICES[0].id)
+  const activeService = SERVICES.find((service) => service.id === activeTab) ?? tabServices[0]
+
   return (
     <section className="bg-muted/60">
       <div className="mx-auto max-w-7xl px-5 py-24 lg:px-8 lg:py-32">
@@ -714,57 +760,107 @@ export function ServicesSection() {
           title="Comprehensive dental care for every smile"
           body="From prevention to restoration and cosmetic care, our team supports your oral health at every stage."
         />
-        <div className="mt-14 grid gap-5 lg:grid-cols-3">
-          {SERVICES.map((service, index) => (
-            <Reveal key={service.id} delay={index * 100}>
-              <article
-                className={`group relative overflow-hidden rounded-3xl border p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
-                  index === 1 ? 'border-accent/40 bg-primary text-primary-foreground' : 'border-border bg-card'
-                }`}
-              >
-                {index === 1 && (
-                  <span className="absolute right-6 top-6 z-10 flex items-center gap-1 rounded-full bg-accent/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-accent">
-                    <GoldFlourish className="size-3" /> Most requested
-                  </span>
-                )}
-                <div
-                  className={`absolute -right-8 -top-8 size-24 rounded-full transition-transform duration-300 group-hover:scale-110 ${
-                    index === 1 ? 'bg-secondary/20' : 'bg-secondary/10'
-                  }`}
-                />
-                <span
-                  className={`relative flex size-12 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:-rotate-6 ${
-                    index === 1 ? 'bg-accent text-accent-foreground' : 'bg-secondary/15 text-secondary'
-                  }`}
-                >
-                  <Icon name={service.icon} className="size-6" />
+
+        <Reveal className="mt-14">
+          <article
+            id={featured.id}
+            className="relative overflow-hidden rounded-[2rem] border border-accent/40 bg-primary p-7 text-primary-foreground shadow-xl sm:p-10"
+          >
+            <span className="absolute right-6 top-6 z-10 flex items-center gap-1 rounded-full bg-accent/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-accent">
+              <GoldFlourish className="size-3" /> Most requested
+            </span>
+            <div className="absolute -right-8 -top-8 size-32 rounded-full bg-secondary/20" />
+            <div className="relative grid gap-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+              <div>
+                <span className="flex size-12 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
+                  <Icon name={featured.icon} className="size-6" />
                 </span>
-                <h3 className={`relative mt-7 font-serif text-2xl font-semibold ${index === 1 ? 'text-primary-foreground' : 'text-primary'}`}>
-                  {service.name}
-                </h3>
-                <p className={`relative mt-3 leading-7 ${index === 1 ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                  {service.description}
-                </p>
-                <ul className="relative mt-6 grid gap-3">
-                  {service.items.slice(0, 4).map((item) => (
-                    <li key={item} className={`flex items-center gap-2 text-sm ${index === 1 ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                <h3 className="mt-6 font-serif text-3xl font-semibold text-primary-foreground">{featured.name}</h3>
+                <p className="mt-3 max-w-xl leading-7 text-primary-foreground/70">{featured.description}</p>
+                <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+                  {featured.items.map((item) => (
+                    <li key={item} className="flex items-center gap-2 text-sm text-primary-foreground/80">
                       <Check className="size-4 shrink-0 text-secondary" />
                       {item}
                     </li>
                   ))}
                 </ul>
-                <Link
-                  href="/services"
-                  className={`group/link relative mt-7 inline-flex items-center gap-2 text-sm font-bold ${
-                    index === 1 ? 'text-accent' : 'text-primary'
-                  }`}
-                >
-                  View all services{' '}
-                  <CircleArrowRight className="size-4 transition-transform duration-200 group-hover/link:translate-x-1" />
+                <Link href="/contact#appointment" className="group/link mt-8 inline-flex items-center gap-2 text-sm font-bold text-accent">
+                  Book this service <CircleArrowRight className="size-4 transition-transform duration-200 group-hover/link:translate-x-1" />
                 </Link>
+              </div>
+              <div className="rounded-3xl border border-primary-foreground/10 bg-primary-foreground/5 p-5 backdrop-blur-sm">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent">What&apos;s included</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {featured.items.map((item) => (
+                    <span key={item} className="rounded-full bg-primary-foreground/10 px-3 py-1.5 text-xs font-semibold text-primary-foreground/85">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </article>
+        </Reveal>
+
+        <div className="mt-10">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <p className="text-sm font-semibold text-primary">Explore more care options</p>
+            <div role="tablist" aria-label="Service categories" className="flex flex-wrap gap-2">
+              {tabServices.map((service) => {
+                const isActive = activeTab === service.id
+                return (
+                  <button
+                    key={service.id}
+                    role="tab"
+                    type="button"
+                    aria-selected={isActive}
+                    onClick={() => setActiveTab(service.id)}
+                    className={`rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                      isActive
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'bg-card text-muted-foreground ring-1 ring-border hover:text-primary'
+                    }`}
+                  >
+                    {service.name}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {activeService && (
+            <Reveal key={activeService.id} className="mt-5">
+              <article
+                id={activeService.id}
+                role="tabpanel"
+                className="rounded-[2rem] border border-border bg-card p-7 shadow-sm sm:p-9"
+              >
+                <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="max-w-2xl">
+                    <span className="flex size-11 items-center justify-center rounded-2xl bg-secondary/15 text-secondary">
+                      <Icon name={activeService.icon} className="size-5" />
+                    </span>
+                    <h3 className="mt-5 font-serif text-2xl font-semibold text-primary sm:text-3xl">{activeService.name}</h3>
+                    <p className="mt-3 leading-7 text-muted-foreground">{activeService.description}</p>
+                  </div>
+                  <Link href="/contact#appointment" className="shrink-0">
+                    <Button className="rounded-full">
+                      Book a visit <CircleArrowRight data-icon="inline-end" />
+                    </Button>
+                  </Link>
+                </div>
+                <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {activeService.items.map((item) => (
+                    <li key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Check className="size-4 shrink-0 text-secondary" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </article>
             </Reveal>
-          ))}
+          )}
         </div>
       </div>
     </section>
@@ -772,41 +868,54 @@ export function ServicesSection() {
 }
 
 export function PopularServices() {
-  const serviceImages = [PIX.serviceCleaning, PIX.serviceWhitening, PIX.serviceCheckup]
+  const featured = POPULAR_SERVICES.filter((service) => service.featured)
+  const exploreTabs = POPULAR_SERVICES
+  const [activeTab, setActiveTab] = useState(exploreTabs.find((s) => !s.featured)?.id ?? exploreTabs[0].id)
+  const activeService = exploreTabs.find((service) => service.id === activeTab) ?? exploreTabs[0]
 
   return (
     <section className="mx-auto max-w-7xl px-5 py-24 lg:px-8 lg:py-32">
       <SectionHeading
         eyebrow="Popular treatments"
         title="Small changes. Big confidence."
-        body="Explore some of the ways our team can help you feel great about your smile."
+        body="See real before-and-after results from professional cleaning and whitening, then explore every treatment in the tabs below."
       />
-      <div className="mt-12 grid gap-5 md:grid-cols-3">
-        {POPULAR_SERVICES.map((service, index) => (
+
+      <div className="mt-12 grid gap-6 lg:grid-cols-2">
+        {featured.map((service, index) => (
           <Reveal key={service.id} delay={index * 100}>
-            <article className="group overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-              <div className="relative aspect-[5/3] overflow-hidden">
-                <Image
-                  src={serviceImages[index] ?? PIX.serviceCleaning}
-                  alt={service.name}
-                  width={600}
-                  height={360}
-                  className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <span className="absolute left-4 top-4 flex size-11 items-center justify-center rounded-xl bg-background/90 text-secondary shadow-md backdrop-blur-sm">
-                  <Icon name={service.icon} className="size-5" />
-                </span>
-                <SmileMark className="absolute bottom-3 right-3 size-8 text-background/70" />
-                <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-primary/70 via-primary/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  <span className="mb-4 flex items-center gap-1 rounded-full bg-background/95 px-4 py-2 text-xs font-bold text-primary shadow">
-                    Learn more <CircleArrowRight className="size-3" />
-                  </span>
+            <article className="group overflow-hidden rounded-[2rem] border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+              {service.beforeAfter ? (
+                <div className="p-3 pb-0 sm:p-4 sm:pb-0">
+                  <BeforeAfter
+                    before={service.beforeAfter.before}
+                    after={service.beforeAfter.after}
+                    label={service.name}
+                    priority={index === 0}
+                  />
                 </div>
-              </div>
-              <div className="p-6">
-                <h3 className="font-serif text-2xl font-semibold text-primary">{service.name}</h3>
-                <p className="mt-3 text-sm leading-6 text-muted-foreground">{service.description}</p>
-                <div className="mt-6 flex flex-wrap gap-2">
+              ) : (
+                <div className="relative aspect-[5/3] overflow-hidden">
+                  <Image
+                    src={service.image}
+                    alt={service.name}
+                    fill
+                    sizes="(min-width: 1024px) 40vw, 100vw"
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              <div className="p-6 sm:p-7">
+                <div className="flex items-start gap-3">
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-secondary/15 text-secondary">
+                    <Icon name={service.icon} className="size-5" />
+                  </span>
+                  <div>
+                    <h3 className="font-serif text-2xl font-semibold text-primary">{service.name}</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{service.description}</p>
+                  </div>
+                </div>
+                <div className="mt-5 flex flex-wrap gap-2">
                   {service.benefits.map((benefit) => (
                     <span key={benefit} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
                       {benefit}
@@ -817,6 +926,79 @@ export function PopularServices() {
             </article>
           </Reveal>
         ))}
+      </div>
+
+      <div className="mt-12">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm font-semibold text-primary">Explore treatments</p>
+          <div role="tablist" aria-label="Popular treatments" className="flex flex-wrap gap-2">
+            {exploreTabs.map((service) => {
+              const isActive = activeTab === service.id
+              return (
+                <button
+                  key={service.id}
+                  role="tab"
+                  type="button"
+                  aria-selected={isActive}
+                  onClick={() => setActiveTab(service.id)}
+                  className={`rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                    isActive
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-muted text-muted-foreground hover:text-primary'
+                  }`}
+                >
+                  {service.name}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <Reveal key={activeService.id} className="mt-5">
+          <article
+            role="tabpanel"
+            className="overflow-hidden rounded-[2rem] border border-border bg-card shadow-sm md:grid md:grid-cols-[1.05fr_0.95fr]"
+          >
+            <div className="p-3 md:p-4">
+              {activeService.beforeAfter ? (
+                <BeforeAfter
+                  before={activeService.beforeAfter.before}
+                  after={activeService.beforeAfter.after}
+                  label={activeService.name}
+                />
+              ) : (
+                <div className="relative aspect-[5/3] overflow-hidden rounded-2xl md:aspect-auto md:min-h-[280px]">
+                  <Image
+                    src={activeService.image}
+                    alt={activeService.name}
+                    fill
+                    sizes="(min-width: 768px) 45vw, 100vw"
+                    className="object-cover"
+                  />
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col justify-center p-6 pt-2 sm:p-8 md:pt-8">
+              <span className="flex size-11 items-center justify-center rounded-xl bg-secondary/15 text-secondary">
+                <Icon name={activeService.icon} className="size-5" />
+              </span>
+              <h3 className="mt-5 font-serif text-2xl font-semibold text-primary sm:text-3xl">{activeService.name}</h3>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">{activeService.description}</p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {activeService.benefits.map((benefit) => (
+                  <span key={benefit} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
+                    {benefit}
+                  </span>
+                ))}
+              </div>
+              <Link href="/contact#appointment" className="mt-7">
+                <Button className="rounded-full">
+                  Book this treatment <CircleArrowRight data-icon="inline-end" />
+                </Button>
+              </Link>
+            </div>
+          </article>
+        </Reveal>
       </div>
     </section>
   )
