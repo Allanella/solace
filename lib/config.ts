@@ -140,14 +140,16 @@ export const POPULAR_SERVICES = [
   {
     id: 'cleaning',
     name: 'Professional Cleaning',
-    description: 'Remove plaque and tartar buildup for a fresh, clean mouth.',
+    description:
+      'Scaling and polishing to remove plaque and tartar for a fresh, clean mouth.',
     icon: 'Sparkles',
     benefits: ['Prevents cavities', 'Fresh breath', 'Healthy gums'],
     featured: true,
-    image: '/pix/cleaning-after.webp',
+    // Swapped: images that were under whitening on the live site
+    image: '/pix/set-a-after.webp',
     beforeAfter: {
-      before: '/pix/cleaning-before.webp',
-      after: '/pix/cleaning-after.webp',
+      before: '/pix/set-a-before.webp',
+      after: '/pix/set-a-after.webp',
     },
   },
   {
@@ -157,10 +159,11 @@ export const POPULAR_SERVICES = [
     icon: 'Lightbulb',
     benefits: ['Instant results', 'Safe and effective', 'Long-lasting'],
     featured: true,
-    image: '/pix/whitening-after.webp',
+    // Swapped: images that were under cleaning on the live site
+    image: '/pix/set-b-after.webp',
     beforeAfter: {
-      before: '/pix/whitening-before.webp',
-      after: '/pix/whitening-after.webp',
+      before: '/pix/set-b-before.webp',
+      after: '/pix/set-b-after.webp',
     },
   },
   {

@@ -1009,12 +1009,18 @@ export function TrustSection() {
     <section className="bg-primary text-primary-foreground">
       <div className="mx-auto max-w-7xl px-5 py-24 lg:px-8 lg:py-32">
         <div className="grid gap-14 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-          <SectionHeading
-            tone="dark"
-            eyebrow="The Solace difference"
-            title="Why choose Solace Dentalcare?"
-            body="Your comfort, trust and long-term oral health are at the heart of everything we do."
-          />
+          <div className="max-w-2xl">
+            <Eyebrow tone="dark">The Solace difference</Eyebrow>
+            <h2 className="mt-4 font-serif text-3xl font-semibold leading-tight tracking-tight text-primary-foreground text-balance sm:text-4xl lg:text-5xl">
+              Why choose Solace Dentalcare?
+            </h2>
+            <p className="mt-5 text-base leading-7 text-primary-foreground/70">
+              At Solace, we believe a dental visit should bring you solace — relief, comfort, great experience, and peace of mind. Not fear.
+            </p>
+            <p className="mt-4 text-base leading-7 text-primary-foreground/70">
+              We combine gentle, modern dentistry with honest prices and real care for you and your family.
+            </p>
+          </div>
           <div className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {TRUST_POINTS.map((point, index) => (
               <Reveal key={point.title} delay={index * 80}>
